@@ -1,0 +1,57 @@
+{
+  "info": {
+    "_postman_id": "9b6f1280-7f8b-4b2c-9c70-1db88c9c2f01",
+    "name": "Task Management System API",
+    "description": "REST API collection for the Taskflow full-stack assignment. Start the Express backend on port 5000 before running requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api" },
+    { "key": "taskId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [{
+        "name": "API health check",
+        "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/health" },
+        "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Health check returns 200', function () { pm.response.to.have.status(200); });"] } }]
+      }]
+    },
+    {
+      "name": "Tasks",
+      "item": [
+        {
+          "name": "Get all tasks",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/tasks" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('List returns 200', function () { pm.response.to.have.status(200); });", "pm.test('Response contains a task array', function () { pm.expect(pm.response.json().data).to.be.an('array'); });"] } }]
+        },
+        {
+          "name": "Create task",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"title\": \"Test task from Postman\",\n  \"description\": \"Check create, update, and delete endpoints\",\n  \"status\": \"pending\",\n  \"priority\": \"high\",\n  \"dueDate\": \"2026-10-20\"\n}" }, "url": "{{baseUrl}}/tasks" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Task is created with 201', function () { pm.response.to.have.status(201); });", "const body = pm.response.json();", "if (body.data && body.data.id) pm.collectionVariables.set('taskId', body.data.id);"] } }]
+        },
+        {
+          "name": "Get task by ID",
+          "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/tasks/{{taskId}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Task lookup returns 200', function () { pm.response.to.have.status(200); });"] } }]
+        },
+        {
+          "name": "Update task",
+          "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"status\": \"in_progress\",\n  \"priority\": \"medium\"\n}" }, "url": "{{baseUrl}}/tasks/{{taskId}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Task update returns 200', function () { pm.response.to.have.status(200); });"] } }]
+        },
+        {
+          "name": "Delete task",
+          "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/tasks/{{taskId}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Task delete returns 200', function () { pm.response.to.have.status(200); });"] } }]
+        },
+        {
+          "name": "Validation example — missing title",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"title\": \"   \",\n  \"description\": \"This should be rejected\"\n}" }, "url": "{{baseUrl}}/tasks" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Invalid task returns 400', function () { pm.response.to.have.status(400); });"] } }]
+        }
+      ]
+    }
+  ]
+}
